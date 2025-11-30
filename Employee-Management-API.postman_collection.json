@@ -1,0 +1,700 @@
+{
+  "info": {
+    "name": "Employee Management API",
+    "description": "Complete API collection for Employee Management System with authentication and CRUD operations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employeeId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('authToken', response.data.token);",
+                  "    pm.collectionVariables.set('authToken', response.data.token);",
+                  "    pm.test('Registration successful', function() {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.data).to.have.property('token');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Registration failed', function() {",
+                  "        pm.expect(pm.response.code).to.equal(201);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('authToken', response.data.token);",
+                  "    pm.collectionVariables.set('authToken', response.data.token);",
+                  "    pm.test('Login successful', function() {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.data).to.have.property('token');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Login failed', function() {",
+                  "        pm.expect(pm.response.code).to.equal(200);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with existing credentials"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has user data', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.have.property('username');",
+                  "    pm.expect(response.data).to.have.property('email');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Get current logged in user details"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Employees",
+      "item": [
+        {
+          "name": "Get All Employees",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has employees array', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('array');",
+                  "    pm.expect(response).to.have.property('count');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            },
+            "description": "Retrieve all employees"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Employees with Filters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Filtered results returned', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/employees?department=IT&search=john",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"],
+              "query": [
+                {
+                  "key": "department",
+                  "value": "IT"
+                },
+                {
+                  "key": "search",
+                  "value": "john"
+                },
+                {
+                  "key": "position",
+                  "value": "developer",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get employees with filters (department, position, search)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('employeeId', response.data._id);",
+                  "    pm.test('Employee created successfully', function() {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.data).to.have.property('_id');",
+                  "        pm.expect(response.data.firstName).to.equal('John');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"position\": \"Software Engineer\",\n  \"salary\": 75000,\n  \"dateOfJoining\": \"2024-01-15\",\n  \"department\": \"IT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            },
+            "description": "Create a new employee"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Employee details returned', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.have.property('firstName');",
+                  "    pm.expect(response.data).to.have.property('email');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/employees/{{employeeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "{{employeeId}}"]
+            },
+            "description": "Get a specific employee by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Employee updated successfully', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data.salary).to.equal(80000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"salary\": 80000,\n  \"position\": \"Senior Software Engineer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees/{{employeeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "{{employeeId}}"]
+            },
+            "description": "Update an existing employee"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Employee deleted successfully', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/employees/{{employeeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "{{employeeId}}"]
+            },
+            "description": "Delete an employee"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sample Data Creation",
+      "item": [
+        {
+          "name": "Create Multiple Employees",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"position\": \"Product Manager\",\n  \"salary\": 85000,\n  \"dateOfJoining\": \"2024-02-01\",\n  \"department\": \"Marketing\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            },
+            "description": "Create sample employee - Jane Smith"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Employee - IT Department",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Michael\",\n  \"lastName\": \"Johnson\",\n  \"email\": \"michael.j@example.com\",\n  \"position\": \"DevOps Engineer\",\n  \"salary\": 78000,\n  \"dateOfJoining\": \"2024-03-10\",\n  \"department\": \"IT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            },
+            "description": "Create sample employee in IT"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Employee - HR Department",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Sarah\",\n  \"lastName\": \"Williams\",\n  \"email\": \"sarah.w@example.com\",\n  \"position\": \"HR Manager\",\n  \"salary\": 72000,\n  \"dateOfJoining\": \"2023-11-15\",\n  \"department\": \"HR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            },
+            "description": "Create sample employee in HR"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Cases",
+      "item": [
+        {
+          "name": "Login with Invalid Credentials",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"wrong@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Test login with invalid credentials - should return 401"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Employee without Auth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"test@example.com\",\n  \"position\": \"Tester\",\n  \"salary\": 50000,\n  \"dateOfJoining\": \"2024-01-01\",\n  \"department\": \"IT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            },
+            "description": "Test creating employee without authentication - should return 401"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Employee with Invalid Data",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"email\": \"invalid-email\",\n  \"salary\": -1000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            },
+            "description": "Test creating employee with invalid data - should return 400"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Non-existent Employee",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/employees/507f1f77bcf86cd799439011",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "507f1f77bcf86cd799439011"]
+            },
+            "description": "Test getting non-existent employee - should return 404"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Check if the server is running"
+      },
+      "response": []
+    }
+  ]
+}
